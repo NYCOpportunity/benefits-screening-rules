@@ -7,6 +7,7 @@ from __future__ import annotations
 from src.rules.base_rule import BaseRule
 from src.rules.registry import register_rule
 from src.models.enums import HouseholdMemberType
+from src.rules.thresholds import income_at_or_below, limits_for
 
 
 @register_rule
@@ -35,17 +36,6 @@ class PublicHousing(BaseRule):
         HouseholdMemberType.BOYFRIEND_GIRLFRIEND,
     }
 
-    HOUSEHOLD_INCOME_THRESHOLDS = {
-        1: 95000,
-        2: 108600,
-        3: 122150,
-        4: 135700,
-        5: 146600,
-        6: 157450,
-        7: 168300,
-        8: 179150,
-    }
-
     @classmethod
     def evaluate(cls, request) -> bool:
         persons = request.person
@@ -65,17 +55,12 @@ class PublicHousing(BaseRule):
         if household_size > 1:
             if cls._has_family_relationship(persons):
                 # Step 4: Household gross annual income by household size.
-                return cls._meets_household_income_threshold(
-                    request.income_household_total_yearly, household_size
-                )
+                return income_at_or_below(request, cls.program, household_size)
 
             # Step 5: Two or more unrelated adults check income individually.
             return cls._meets_individual_unrelated_adult_income(request, persons)
 
-        # Single-person households use the household income threshold for size 1.
-        return cls._meets_household_income_threshold(
-            request.income_household_total_yearly, household_size
-        )
+        return income_at_or_below(request, cls.program, household_size)
 
     @classmethod
     def _get_head_of_household(cls, persons):
@@ -104,15 +89,6 @@ class PublicHousing(BaseRule):
         )
 
     @classmethod
-    def _meets_household_income_threshold(
-        cls, household_yearly_income: float, household_size: int
-    ) -> bool:
-        threshold = cls.HOUSEHOLD_INCOME_THRESHOLDS.get(household_size)
-        if threshold is None:
-            return False
-        return household_yearly_income <= threshold
-
-    @classmethod
     def _meets_individual_unrelated_adult_income(cls, request, persons) -> bool:
         adult_count = sum(1 for person in persons if person.age >= 18)
         if adult_count < 2:
@@ -124,13 +100,14 @@ class PublicHousing(BaseRule):
             if person.household_member_type not in cls.UNRELATED_TO_HEAD_OF_HOUSEHOLD:
                 return False
 
+        individual_limit = limits_for("S2R035").get(1)
+        if individual_limit is None:
+            return False
+
         for index, person in enumerate(persons):
             if person.age < 18:
                 continue
-            if (
-                request.income_person_yearly.get(index, 0.0)
-                <= cls.HOUSEHOLD_INCOME_THRESHOLDS.get(1)
-            ):
+            if request.income_person_yearly.get(index, 0.0) <= individual_limit:
                 return True
 
         return False

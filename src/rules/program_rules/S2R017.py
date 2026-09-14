@@ -7,6 +7,7 @@ from __future__ import annotations
 from src.rules.base_rule import BaseRule
 from src.rules.registry import register_rule
 from src.models.enums import IncomeType
+from src.rules.thresholds import scalar_limit
 
 
 @register_rule
@@ -19,7 +20,7 @@ class DisabledHomeownersExemption(BaseRule):
         """
         Eligibility requires:
         1. Household owns their home
-        2. Total yearly income of all owners <= $58,399
+        2. Total yearly income of all owners at or below maximum (see thresholds.yaml for this program rule)
         3. At least one owner is either:
            - Disabled
            - Blind
@@ -32,8 +33,8 @@ class DisabledHomeownersExemption(BaseRule):
         if not household.living_owner:
             return False
         
-        # Check owners' income threshold
-        if request.income_owners_total_yearly > 58399:
+        maximum = scalar_limit("S2R017", "maximum")
+        if maximum is None or request.income_owners_total_yearly > maximum:
             return False
         
         # Check for disabled or blind owner on deed

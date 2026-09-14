@@ -7,6 +7,7 @@ from __future__ import annotations
 from src.rules.base_rule import BaseRule
 from src.rules.registry import register_rule
 from src.models.enums import HouseholdMemberType
+from src.rules.thresholds import scalar_limit
 
 
 @register_rule
@@ -20,25 +21,27 @@ class NYCFreeTaxPrep(BaseRule):
         HouseholdMemberType.FOSTER_CHILD,
     }
 
-    GENERAL_INCOME_LIMIT = 68000
-    HOUSEHOLD_WITH_DEPENDENT_INCOME_LIMIT = 97000
-
     @classmethod
     def evaluate(cls, request) -> bool:
         """
         Eligibility requires either:
-        1. Household yearly income at or below $68,000, or
+        1. Household yearly income at or below the general limit, or
         2. Multi-person household with a child, stepchild, or foster child
-           and household yearly income at or below $97,000
+           and household yearly income at or below the with_dependent_child limit
+        (see thresholds.yaml for this program rule)
         """
         yearly_income = request.income_household_total_yearly
-
-        if yearly_income <= cls.GENERAL_INCOME_LIMIT:
+        general_limit = scalar_limit("S2R039", "general")
+        if general_limit is not None and yearly_income <= general_limit:
             return True
+
+        dependent_limit = scalar_limit("S2R039", "with_dependent_child")
+        if dependent_limit is None:
+            return False
 
         persons = request.person
         if len(persons) > 1 and cls._has_dependent_child(persons):
-            return yearly_income <= cls.HOUSEHOLD_WITH_DEPENDENT_INCOME_LIMIT
+            return yearly_income <= dependent_limit
 
         return False
 

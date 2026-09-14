@@ -6,6 +6,7 @@ from __future__ import annotations
 
 from src.rules.base_rule import BaseRule
 from src.rules.registry import register_rule
+from src.rules.thresholds import income_at_or_below
 
 
 @register_rule
@@ -31,22 +32,5 @@ class NYCCare(BaseRule):
         
         if not has_uninsured:
             return False
-        
-        # Income thresholds by household size
-        income_thresholds = {
-            1: 2909,
-            2: 3931,
-            3: 4953,
-            4: 5975,
-            5: 6997,
-            6: 8019,
-            7: 9041,
-            8: 10063
-        }
-        
-        # Check income eligibility
-        if household_size in income_thresholds:
-            if request.income_household_total_monthly <= income_thresholds[household_size]:
-                return True
-        
-        return False
+
+        return income_at_or_below(request, cls.program, household_size)

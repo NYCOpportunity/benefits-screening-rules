@@ -6,6 +6,7 @@ from __future__ import annotations
 
 from src.rules.base_rule import BaseRule
 from src.rules.registry import register_rule
+from src.rules.thresholds import scalar_limit
 
 
 @register_rule
@@ -18,16 +19,16 @@ class SchoolTaxRelief(BaseRule):
         """
         Eligibility requires:
         1. Household owns their home
-        2. Total yearly income of all owners <= $500,000
+        2. Total yearly income of all owners at or below maximum (see thresholds.yaml for this program rule)
         """
         household = request.household[0]
         
         # Check home ownership
         if not household.living_owner:
             return False
-        
+
         # Check owners' income threshold
-        if request.income_owners_total_yearly <= 500000:
-            return True
-        
-        return False
+        maximum = scalar_limit("S2R012", "maximum")
+        if maximum is None:
+            return False
+        return request.income_owners_total_yearly <= maximum

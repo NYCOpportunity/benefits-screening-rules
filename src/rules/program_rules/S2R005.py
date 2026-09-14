@@ -7,6 +7,7 @@ from __future__ import annotations
 from src.rules.base_rule import BaseRule
 from src.rules.registry import register_rule
 from src.models.enums import HouseholdMemberType, LivingRentalType, IncomeType
+from src.rules.thresholds import scalar_limit
 
 
 @register_rule
@@ -21,7 +22,7 @@ class DisabilityRentIncreaseExemption(BaseRule):
         1. Household is renting specific types (Rent Controlled, HDFC, Mitchell Lama, Section 213)
         2. Head of household is 18+ and on the lease
         3. Head of household has SSI, SSDisability, Veteran, or DisabilityMedicaid income
-        4. Total yearly household income ≤ $50,000
+        4. Total yearly household income at or below maximum (see thresholds.yaml for this program rule)
         """
         household = request.household[0]
         persons = request.person
@@ -58,10 +59,13 @@ class DisabilityRentIncreaseExemption(BaseRule):
         if not cls._head_has_qualifying_income(head_of_household):
             return False
         
-        # Check income threshold
-        if request.income_household_total_yearly > 50000:
+        maximum = scalar_limit("S2R005", "maximum")
+        if maximum is None:
             return False
-        
+
+        if request.income_household_total_yearly > maximum:
+            return False
+
         return True
     
     @classmethod

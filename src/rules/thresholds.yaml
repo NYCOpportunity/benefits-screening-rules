@@ -1,0 +1,398 @@
+S2R003:
+  field: income_adults_children_total_monthly
+  by_size:
+    2: 6156
+    3: 7604
+    4: 9053
+    5: 10501
+    6: 11949
+    7: 12221
+    8: 12493
+
+S2R004:
+  minimum: 2500
+  single: 200000
+  married: 400000
+
+S2R005:
+  maximum: 50000
+
+S2R006:
+  investment_limit: 11950
+  married_no_children: 26214
+  single_no_children: 19104
+  other_member: 19104
+  married_with_children:
+    by_size:
+      1: 57554
+      2: 64430
+      3: 68675
+  single_with_children:
+    by_size:
+      1: 50434
+      2: 57310
+      3: 61555
+
+S2R007:
+  fpl_130:
+    by_size:
+      1: 1696
+      2: 2292
+      3: 2888
+      4: 3483
+      5: 4079
+      6: 4675
+      7: 5271
+      8: 5867
+  fpl_150:
+    by_size:
+      1: 1957
+      2: 2644
+      3: 3332
+      4: 4019
+      5: 4707
+      6: 5394
+      7: 6082
+      8: 6769
+  fpl_200:
+    by_size:
+      1: 2608
+      2: 3525
+      3: 4442
+      4: 5358
+      5: 6275
+      6: 7192
+      7: 8108
+      8: 9025
+
+S2R008:
+  field: income_household_total_yearly
+  by_size:
+    1: 15960
+    2: 21640
+    3: 27320
+    4: 33000
+    5: 38680
+    6: 44360
+    7: 50040
+    8: 55720
+
+S2R010:
+  with_child_or_pregnant:
+    by_size:
+      1: 460.10
+      2: 574.50
+      3: 789.00
+      4: 951.70
+      5: 1119.70
+      6: 1238.20
+      7: 1357.70
+      8: 1455.20
+  general:
+    by_size:
+      1: 398.10
+      2: 541.50
+      3: 675.00
+      4: 813.70
+      5: 955.70
+      6: 1063.20
+      7: 1214.70
+      8: 1330.20
+
+S2R012:
+  maximum: 500000
+
+S2R013:
+  field: income_household_total_yearly
+  by_size:
+    1: 59400
+    2: 67850
+    3: 76350
+    4: 84800
+    5: 91600
+    6: 98400
+    7: 105200
+    8: 111950
+
+S2R014:
+  maximum: 58399
+
+S2R015:
+  maximum: 50000
+
+S2R017:
+  maximum: 58399
+
+S2R019:
+  field: income_household_total_monthly
+  by_size:
+    1: 3473
+    2: 4542
+    3: 5611
+    4: 6680
+    5: 7749
+    6: 8818
+    7: 9018
+    8: 9218
+
+S2R022:
+  field: income_household_total_yearly
+  by_size:
+    1: 29526
+    2: 40034
+    3: 50542
+    4: 61050
+    5: 71558
+    6: 82066
+    7: 92574
+    8: 103082
+
+S2R025:
+  field: income_household_total_yearly
+  by_size:
+    1: 19563
+    2: 26438
+    3: 33313
+    4: 40188
+    5: 47063
+    6: 53938
+    7: 60813
+    8: 67688
+
+S2R027:
+  field: income_household_total_yearly
+  by_size:
+    1: 23940
+    2: 32460
+    3: 40980
+    4: 49500
+    5: 58020
+    6: 66540
+    7: 75060
+    8: 83580
+
+S2R028:
+  field: income_household_total_yearly
+  by_size:
+    1: 15060
+    2: 20440
+    3: 25820
+    4: 31200
+    5: 36580
+    6: 41960
+    7: 47340
+    8: 52720
+
+S2R029:
+  field: income_household_total_yearly
+  by_size:
+    1: 34900
+    2: 47165
+    3: 59430
+    4: 71695
+    5: 83960
+    6: 96225
+    7: 108490
+    8: 120755
+    9: 133020
+
+S2R031:
+  field: income_household_total_monthly
+  by_size:
+    1: 2909
+    2: 3931
+    3: 4953
+    4: 5975
+    5: 6997
+    6: 8019
+    7: 9041
+    8: 10063
+
+S2R033:
+  field: income_household_total_monthly
+  by_size:
+    1: 3473
+    2: 4542
+    3: 5611
+    4: 6680
+    5: 7749
+    6: 8818
+    7: 9018
+    8: 9218
+
+S2R034:
+  field: income_household_total_yearly
+  by_size:
+    1: 23475
+    2: 31725
+    3: 39975
+    4: 48225
+    5: 56475
+    6: 64725
+    7: 72975
+    8: 81225
+
+S2R035:
+  field: income_household_total_yearly
+  by_size:
+    1: 95000
+    2: 108600
+    3: 122150
+    4: 135700
+    5: 146600
+    6: 157450
+    7: 168300
+    8: 179150
+
+S2R036:
+  field: income_household_total_yearly
+  by_size:
+    1: 15060
+    2: 20440
+    3: 25820
+    4: 31200
+    5: 36580
+    6: 41960
+    7: 47340
+    8: 52720
+
+S2R037:
+  field: income_household_total_yearly
+  by_size:
+    1: 22025
+    2: 29864
+    3: 37702
+    4: 45540
+    5: 53379
+    6: 61217
+    7: 69056
+    8: 76894
+
+S2R038:
+  pregnant_and_infant:
+    by_size:
+      1: 35591
+      2: 48258
+      3: 60924
+      4: 73590
+      5: 86257
+      6: 98923
+      7: 111590
+      8: 124256
+      9: 136922
+  young_adult:
+    by_size:
+      1: 24738
+      2: 33542
+      3: 42346
+      4: 51150
+      5: 59954
+      6: 68758
+      7: 77562
+      8: 86366
+  youth:
+    by_size:
+      1: 24579
+      2: 33326
+      3: 42073
+      4: 50820
+      5: 59568
+      6: 68315
+      7: 77062
+      8: 85809
+  default:
+    by_size:
+      1: 22025
+      2: 29864
+      3: 37702
+      4: 45540
+      5: 53379
+      6: 61217
+      7: 69056
+      8: 76894
+
+S2R039:
+  general: 68000
+  with_dependent_child: 97000
+
+S2R040:
+  field: income_child_care_voucher_total_monthly
+  by_size:
+    2: 6601.24
+    3: 8155.48
+    4: 9707.70
+    5: 11260.94
+    6: 12814.18
+    7: 13105.40
+    8: 13396.64
+
+S2R043:
+  field: income_household_total_yearly
+  by_size:
+    1: 21128
+    2: 28553
+    3: 35978
+    4: 43403
+    5: 50828
+    6: 58253
+    7: 65678
+    8: 73103
+
+S2R055:
+  cash_on_hand_maximum: 256245
+  field: income_household_total_yearly
+  by_size:
+    1: 179355
+    2: 205095
+    3: 230670
+    4: 256245
+    5: 276705
+    6: 297165
+    7: 317790
+    8: 338250
+
+S2R057:
+  infant:
+    by_size:
+      1: 33584
+      2: 45582
+      3: 57579
+      4: 69576
+      5: 81574
+      6: 93571
+      7: 105569
+      8: 117566
+  child:
+    by_size:
+      1: 23193
+      2: 31478
+      3: 39763
+      4: 48048
+      5: 56334
+      6: 64619
+      7: 72904
+      8: 81189
+
+S2R058:
+  field: income_household_total_yearly
+  by_size:
+    1: 31920
+    2: 43280
+    3: 54640
+    4: 66000
+    5: 77360
+    6: 88720
+    7: 100080
+    8: 111440
+
+S2R062:
+  field: income_household_total_monthly
+  by_size:
+    1: 2461
+    2: 3337
+    3: 4212
+    4: 5088
+    5: 5964
+    6: 6839
+    7: 7715
+    8: 8591

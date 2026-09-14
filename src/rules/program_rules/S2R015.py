@@ -7,6 +7,7 @@ from __future__ import annotations
 from src.rules.base_rule import BaseRule
 from src.rules.registry import register_rule
 from src.models.enums import HouseholdMemberType, LivingRentalType
+from src.rules.thresholds import scalar_limit
 
 
 @register_rule
@@ -21,7 +22,8 @@ class SeniorCitizenRentIncreaseExemption(BaseRule):
         1. Household is renting
         2. Rental type is one of: RentControlled, HDFC, RentRegulatedHotel, MitchellLama, Section213
         3. Head of household is age 62+ and on the lease
-        4. Total yearly household income (excluding gifts) ≤ $50,000
+        4. Total yearly household income (excluding gifts) at or below maximum
+           (see thresholds.yaml for this program rule)
         """
         household = request.household[0]
         persons = request.person
@@ -55,7 +57,11 @@ class SeniorCitizenRentIncreaseExemption(BaseRule):
         if head_of_household.age < 62 or not head_of_household.living_rental_on_lease:
             return False
 
-        if request.income_household_total_monthly_less_gifts * 12 > 50000:
+        maximum = scalar_limit("S2R015", "maximum")
+        if maximum is None:
             return False
-        
+
+        if request.income_household_total_monthly_less_gifts * 12 > maximum:
+            return False
+
         return True

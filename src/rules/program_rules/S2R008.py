@@ -7,23 +7,13 @@ from __future__ import annotations
 from src.rules.base_rule import BaseRule
 from src.rules.registry import register_rule
 from src.models.enums import HouseholdMemberType
+from src.rules.thresholds import income_at_or_below
 
 
 @register_rule
 class HeadStart(BaseRule):
     program = "S2R008"
     description = "Head Start (DOE) - Free early childhood education for children aged 3-4"
-
-    INCOME_THRESHOLDS = {
-        1: 15960,
-        2: 21640,
-        3: 27320,
-        4: 33000,
-        5: 38680,
-        6: 44360,
-        7: 50040,
-        8: 55720,
-    }
 
     @classmethod
     def evaluate(cls, request) -> bool:
@@ -43,7 +33,7 @@ class HeadStart(BaseRule):
         if cls._has_cash_assistance_or_ssi(request):
             return True
 
-        if cls._income_within_limits(request, household_size):
+        if income_at_or_below(request, cls.program, household_size):
             return True
 
         return cls._has_foster_child_of_head(persons, request)
@@ -58,13 +48,6 @@ class HeadStart(BaseRule):
             request.income_household_has_cash_assistance
             or request.income_household_has_ssi
         )
-
-    @classmethod
-    def _income_within_limits(cls, request, household_size: int) -> bool:
-        threshold = cls.INCOME_THRESHOLDS.get(household_size)
-        if threshold is None:
-            return False
-        return request.income_household_total_yearly <= threshold
 
     @classmethod
     def _has_foster_child_of_head(cls, persons, request) -> bool:

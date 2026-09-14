@@ -6,6 +6,7 @@ from __future__ import annotations
 
 from src.rules.base_rule import BaseRule
 from src.rules.registry import register_rule
+from src.rules.thresholds import income_at_or_below
 
 
 @register_rule
@@ -28,22 +29,5 @@ class CommoditySupplementalFoodProgram(BaseRule):
         
         if not has_senior:
             return False
-        
-        # Income thresholds by household size
-        income_thresholds = {
-            1: 23940,
-            2: 32460,
-            3: 40980,
-            4: 49500,
-            5: 58020,
-            6: 66540,
-            7: 75060,
-            8: 83580,
-        }
-        
-        # Check income eligibility
-        if household_size in income_thresholds:
-            if request.income_household_total_yearly <= income_thresholds[household_size]:
-                return True
-        
-        return False
+
+        return income_at_or_below(request, cls.program, household_size)

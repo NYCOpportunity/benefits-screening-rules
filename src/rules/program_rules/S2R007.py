@@ -7,6 +7,7 @@ from __future__ import annotations
 from src.rules.base_rule import BaseRule
 from src.rules.registry import register_rule
 from src.models.enums import IncomeType
+from src.rules.thresholds import pathway_limit
 
 
 @register_rule
@@ -32,22 +33,23 @@ class SupplementalNutritionAssistanceProgram(BaseRule):
         
         # Calculate SNAP budget
         snap_income = request.income_household_total_monthly - request.expense_household_child_support_monthly
-        
+
         # 200% FPL threshold
         if cls._200_fpl_pathway(request, persons):
-            threshold_200 = {1: 2608, 2: 3525, 3: 4442, 4: 5358, 5: 6275, 6: 7192, 7: 8108, 8: 9025}
-            if snap_income <= threshold_200[household_size]:
+            threshold = pathway_limit("S2R007", "fpl_200", household_size)
+            if threshold is not None and snap_income <= threshold:
                 return True
         # 150% FPL threshold
         elif cls._150_fpl_pathway(request):
-            threshold_150 = {1: 1957, 2: 2644, 3: 3332, 4: 4019, 5: 4707, 6: 5394, 7: 6082, 8: 6769}
-            if snap_income <= threshold_150[household_size]:
+            threshold = pathway_limit("S2R007", "fpl_150", household_size)
+            if threshold is not None and snap_income <= threshold:
                 return True
         # 130% FPL threshold (all others)
         else:
-            threshold_130 = {1: 1696, 2: 2292, 3: 2888, 4: 3483, 5: 4079, 6: 4675, 7: 5271, 8: 5867}
-            if snap_income <= threshold_130[household_size]:
+            threshold = pathway_limit("S2R007", "fpl_130", household_size)
+            if threshold is not None and snap_income <= threshold:
                 return True
+            
         return False
 
     @classmethod
@@ -57,7 +59,6 @@ class SupplementalNutritionAssistanceProgram(BaseRule):
             return False
             
         # Check if all persons have either SSI or Cash Assistance
-        all_have_benefits = True
         for person in persons:
             has_ssi = False
             has_cash_assistance = False
@@ -69,11 +70,10 @@ class SupplementalNutritionAssistanceProgram(BaseRule):
                     has_cash_assistance = True
             
             if not (has_ssi or has_cash_assistance):
-                all_have_benefits = False
-                break
-        
-        return all_have_benefits
-    
+                return False
+
+        return True
+
     @classmethod
     def _200_fpl_pathway(cls, request, persons):
         # Any elderly/disabled/child care dependent

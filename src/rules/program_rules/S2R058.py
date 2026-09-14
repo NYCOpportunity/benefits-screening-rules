@@ -6,6 +6,7 @@ from __future__ import annotations
 
 from src.rules.base_rule import BaseRule
 from src.rules.registry import register_rule
+from src.rules.thresholds import income_at_or_below
 
 
 @register_rule
@@ -36,19 +37,4 @@ class S2R058(BaseRule):
         if not has_eligible_adult:
             return False
 
-        income_thresholds = {
-            1: 31920,
-            2: 43280,
-            3: 54640,
-            4: 66000,
-            5: 77360,
-            6: 88720,
-            7: 100080,
-            8: 111440,
-        }
-
-        if household_size in income_thresholds:
-            if request.income_household_total_yearly <= income_thresholds[household_size]:
-                return True
-
-        return False
+        return income_at_or_below(request, cls.program, household_size)

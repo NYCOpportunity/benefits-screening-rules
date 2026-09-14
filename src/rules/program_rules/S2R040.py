@@ -6,6 +6,7 @@ from __future__ import annotations
 
 from src.rules.base_rule import BaseRule
 from src.rules.registry import register_rule
+from src.rules.thresholds import income_at_or_below
 
 
 @register_rule
@@ -38,21 +39,6 @@ class ChildCareVoucher(BaseRule):
         if request.income_household_has_cash_assistance:
             return True
 
-        eligible_members = request.child_care_voucher_household_members
-        income_thresholds = {
-            2: 6601.24,
-            3: 8155.48,
-            4: 9707.70,
-            5: 11260.94,
-            6: 12814.18,
-            7: 13105.40,
-            8: 13396.64,
-        }
-
-        if eligible_members in income_thresholds:
-            return (
-                request.income_child_care_voucher_total_monthly
-                <= income_thresholds[eligible_members]
-            )
-
-        return False
+        return income_at_or_below(
+            request, cls.program, request.child_care_voucher_household_members
+        )

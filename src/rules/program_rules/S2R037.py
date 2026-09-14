@@ -6,6 +6,7 @@ from __future__ import annotations
 
 from src.rules.base_rule import BaseRule
 from src.rules.registry import register_rule
+from src.rules.thresholds import income_at_or_below, limits_for
 
 
 @register_rule
@@ -38,28 +39,17 @@ class HomeCareServicesProgram(BaseRule):
         if not has_eligible_person:
             return False
 
-        income_thresholds = {
-            1: 22025,
-            2: 29864,
-            3: 37702,
-            4: 45540,
-            5: 53379,
-            6: 61217,
-            7: 69056,
-            8: 76894,
-        }
+        if income_at_or_below(request, cls.program, household_size):
+            return True
 
-        if household_size in income_thresholds:
-            if (
-                request.income_household_total_yearly
-                <= income_thresholds[household_size]
-            ):
-                return True
+        individual_limit = limits_for("S2R037").get(1)
+        if individual_limit is None:
+            return False
 
         for i, person in enumerate(persons):
             if person.disabled or person.blind or person.age >= 65:
                 earned_yearly = request.income_person_earned_yearly.get(i, 0.0)
-                if earned_yearly <= income_thresholds[1]:
+                if earned_yearly <= individual_limit:
                     return True
 
         return False

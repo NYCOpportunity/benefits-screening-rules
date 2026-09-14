@@ -6,6 +6,7 @@ from __future__ import annotations
 
 from src.rules.base_rule import BaseRule
 from src.rules.registry import register_rule
+from src.rules.thresholds import income_at_or_below
 
 
 @register_rule
@@ -31,22 +32,5 @@ class FairFares(BaseRule):
         
         if not has_eligible_adult:
             return False
-        
-        # Income thresholds by household size
-        income_thresholds = {
-            1: 23475,
-            2: 31725,
-            3: 39975,
-            4: 48225,
-            5: 56475,
-            6: 64725,
-            7: 72975,
-            8: 81225
-        }
-        
-        # Check income eligibility
-        if household_size in income_thresholds:
-            if request.income_household_total_yearly <= income_thresholds[household_size]:
-                return True
-        
-        return False
+
+        return income_at_or_below(request, cls.program, household_size)

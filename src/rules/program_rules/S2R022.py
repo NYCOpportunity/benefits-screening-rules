@@ -7,6 +7,7 @@ from __future__ import annotations
 from src.rules.base_rule import BaseRule
 from src.rules.registry import register_rule
 from src.models.enums import IncomeType
+from src.rules.thresholds import income_at_or_below
 
 
 @register_rule
@@ -35,28 +36,11 @@ class WomenInfantsChildren(BaseRule):
         if not has_eligible_person:
             return False
         
-        # Rule 1: Check Medicaid/Disability Medicaid/Cash Assistance eligibility
         if cls._has_medicaid_or_cash_assistance(persons):
             return True
-        
-        # Rule 2: Check income eligibility
-        income_thresholds = {
-            1: 29526,
-            2: 40034,
-            3: 50542,
-            4: 61050,
-            5: 71558,
-            6: 82066,
-            7: 92574,
-            8: 103082,
-        }
-        
-        if household_size in income_thresholds:
-            if request.income_household_total_yearly <= income_thresholds[household_size]:
-                return True
-        
-        return False
-    
+
+        return income_at_or_below(request, cls.program, household_size)
+
     @classmethod
     def _has_medicaid_or_cash_assistance(cls, persons) -> bool:
         """

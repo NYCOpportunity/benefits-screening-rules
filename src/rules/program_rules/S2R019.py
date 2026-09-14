@@ -6,23 +6,13 @@ from __future__ import annotations
 
 from src.rules.base_rule import BaseRule
 from src.rules.registry import register_rule
+from src.rules.thresholds import income_at_or_below
 
 
 @register_rule
 class HomeEnergyAssistanceProgram(BaseRule):
     program = "S2R019"
     description = "Home Energy Assistance Program (HEAP) (HRA) - Help with heating costs for vulnerable households"
-
-    INCOME_THRESHOLDS = {
-        1: 3473,
-        2: 4542,
-        3: 5611,
-        4: 6680,
-        5: 7749,
-        6: 8818,
-        7: 9018,
-        8: 9218,
-    }
 
     @classmethod
     def evaluate(cls, request) -> bool:
@@ -40,8 +30,4 @@ class HomeEnergyAssistanceProgram(BaseRule):
         if household_size == 1 and request.income_household_has_ssi:
             return True
 
-        threshold = cls.INCOME_THRESHOLDS.get(household_size)
-        if threshold is not None:
-            return request.income_household_total_monthly <= threshold
-
-        return False
+        return income_at_or_below(request, cls.program, household_size)

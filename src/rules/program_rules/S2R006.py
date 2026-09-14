@@ -7,33 +7,13 @@ from __future__ import annotations
 from src.rules.base_rule import BaseRule
 from src.rules.registry import register_rule
 from src.models.enums import HouseholdMemberType
+from src.rules.thresholds import pathway_limit, scalar_limit
 
 
 @register_rule
 class EarnedIncomeTaxCredit(BaseRule):
     program = "S2R006"
     description = "Earned Income Tax Credit (EITC) (DCA/IRS) - Tax credit based on marital status, children, and income"
-
-    # Head of household is married
-    MARRIED_WITH_CHILDREN_EARNED_THRESHOLDS = {
-        1: 57554,
-        2: 64430,
-        3: 68675,
-    }
-    MARRIED_NO_CHILDREN_EARNED_THRESHOLD = 26214
-
-    # Head of household is not married
-    SINGLE_WITH_CHILDREN_EARNED_THRESHOLDS = {
-        1: 50434,
-        2: 57310,
-        3: 61555,
-    }
-    SINGLE_NO_CHILDREN_EARNED_THRESHOLD = 19104
-
-    # Step 5 - other household members (Table 2, 0 children)
-    OTHER_MEMBER_EARNED_THRESHOLD = 19104
-    
-    INVESTMENT_LIMIT = 11950
 
     @classmethod
     def evaluate(cls, request) -> bool:
@@ -60,15 +40,11 @@ class EarnedIncomeTaxCredit(BaseRule):
 
         return cls._eligible_other_household_member(request, persons)
 
-    # --- Step 1 ---
-
     @classmethod
     def _head_or_spouse_has_earned_income(cls, request, is_married: bool) -> bool:
         if is_married:
             return request.income_head_and_spouse_earned_yearly > 0
         return request.income_head_earned_yearly > 0
-
-    # --- Step 3: households with a qualifying child ---
 
     @classmethod
     def _eligible_with_qualifying_children(
@@ -86,13 +62,16 @@ class EarnedIncomeTaxCredit(BaseRule):
     def _married_with_children_meets_income_limits(
         cls, request, num_qualifying_children: int
     ) -> bool:
-        """Table 1: sum HoH and spouse earned and investment income."""
-        if cls._head_and_spouse_investment(request) > cls.INVESTMENT_LIMIT:
+        investment_limit = scalar_limit("S2R006", "investment_limit")
+        if investment_limit is None or cls._head_and_spouse_investment(request) > investment_limit:
             return False
 
-        earned_threshold = cls._married_with_children_earned_threshold(
-            num_qualifying_children
+        earned_threshold = cls._with_children_earned_threshold(
+            "married_with_children", num_qualifying_children
         )
+        if earned_threshold is None:
+            return False
+
         earned_income = request.income_head_and_spouse_earned_yearly
         return 0 < earned_income <= earned_threshold
 
@@ -100,17 +79,18 @@ class EarnedIncomeTaxCredit(BaseRule):
     def _unmarried_with_children_meets_income_limits(
         cls, request, num_qualifying_children: int
     ) -> bool:
-        """Table 2: sum HoH earned and investment income."""
-        if cls._head_investment(request) > cls.INVESTMENT_LIMIT:
+        investment_limit = scalar_limit("S2R006", "investment_limit")
+        if investment_limit is None or cls._head_investment(request) > investment_limit:
             return False
 
-        earned_threshold = cls._single_with_children_earned_threshold(
-            num_qualifying_children
+        earned_threshold = cls._with_children_earned_threshold(
+            "single_with_children", num_qualifying_children
         )
+        if earned_threshold is None:
+            return False
+
         earned_income = request.income_head_earned_yearly
         return 0 < earned_income <= earned_threshold
-
-    # --- Step 4: households without a qualifying child ---
 
     @classmethod
     def _eligible_without_qualifying_children(
@@ -122,32 +102,43 @@ class EarnedIncomeTaxCredit(BaseRule):
 
     @classmethod
     def _married_without_children_meets_requirements(cls, request, head, spouse) -> bool:
-        """Table 1, 0 children: HoH or spouse age 25-64, combined income limits."""
         if not (
             (head and 25 <= head.age < 65) or (spouse and 25 <= spouse.age < 65)
         ):
             return False
-        if cls._head_and_spouse_investment(request) > cls.INVESTMENT_LIMIT:
+
+        investment_limit = scalar_limit("S2R006", "investment_limit")
+        earned_threshold = scalar_limit("S2R006", "married_no_children")
+        if investment_limit is None or earned_threshold is None:
+            return False
+        if cls._head_and_spouse_investment(request) > investment_limit:
             return False
 
         earned_income = request.income_head_and_spouse_earned_yearly
-        return 0 < earned_income <= cls.MARRIED_NO_CHILDREN_EARNED_THRESHOLD
+        return 0 < earned_income <= earned_threshold
 
     @classmethod
     def _unmarried_without_children_meets_requirements(cls, request, head) -> bool:
-        """Table 2, 0 children: HoH age 25-64, HoH income limits."""
         if not head or not (25 <= head.age < 65):
             return False
-        if cls._head_investment(request) > cls.INVESTMENT_LIMIT:
+
+        investment_limit = scalar_limit("S2R006", "investment_limit")
+        earned_threshold = scalar_limit("S2R006", "single_no_children")
+        if investment_limit is None or earned_threshold is None:
+            return False
+        if cls._head_investment(request) > investment_limit:
             return False
 
         earned_income = request.income_head_earned_yearly
-        return 0 < earned_income <= cls.SINGLE_NO_CHILDREN_EARNED_THRESHOLD
-
-    # --- Step 5: other household members ---
+        return 0 < earned_income <= earned_threshold
 
     @classmethod
     def _eligible_other_household_member(cls, request, persons) -> bool:
+        investment_limit = scalar_limit("S2R006", "investment_limit")
+        earned_threshold = scalar_limit("S2R006", "other_member")
+        if investment_limit is None or earned_threshold is None:
+            return False
+
         for index, person in enumerate(persons):
             if person.household_member_type in (
                 HouseholdMemberType.HEAD_OF_HOUSEHOLD,
@@ -158,11 +149,11 @@ class EarnedIncomeTaxCredit(BaseRule):
             if not (25 <= person.age < 65):
                 continue
 
-            if request.income_person_investment_yearly.get(index, 0.0) > cls.INVESTMENT_LIMIT:
+            if request.income_person_investment_yearly.get(index, 0.0) > investment_limit:
                 continue
 
             earned_income = request.income_person_earned_yearly.get(index, 0.0)
-            if 0 < earned_income <= cls.OTHER_MEMBER_EARNED_THRESHOLD:
+            if 0 < earned_income <= earned_threshold:
                 return True
 
         return False
@@ -190,16 +181,11 @@ class EarnedIncomeTaxCredit(BaseRule):
         )
 
     @classmethod
-    def _married_with_children_earned_threshold(cls, num_children: int) -> float:
-        if num_children >= 3:
-            return cls.MARRIED_WITH_CHILDREN_EARNED_THRESHOLDS[3]
-        return cls.MARRIED_WITH_CHILDREN_EARNED_THRESHOLDS[num_children]
-
-    @classmethod
-    def _single_with_children_earned_threshold(cls, num_children: int) -> float:
-        if num_children >= 3:
-            return cls.SINGLE_WITH_CHILDREN_EARNED_THRESHOLDS[3]
-        return cls.SINGLE_WITH_CHILDREN_EARNED_THRESHOLDS[num_children]
+    def _with_children_earned_threshold(
+        cls, pathway: str, num_children: int
+    ) -> float | None:
+        children_count = min(num_children, 3)
+        return pathway_limit("S2R006", pathway, children_count)
 
     @classmethod
     def _head_investment(cls, request) -> float:

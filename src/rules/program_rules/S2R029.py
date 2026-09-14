@@ -6,6 +6,7 @@ from __future__ import annotations
 
 from src.rules.base_rule import BaseRule
 from src.rules.registry import register_rule
+from src.rules.thresholds import income_at_or_below
 
 
 @register_rule
@@ -32,23 +33,4 @@ class NurseFamilyPartnership(BaseRule):
         if not has_pregnant:
             return False
 
-        members_plus_pregnant = request.members_plus_pregnant
-        income_thresholds = {
-            1: 34900,
-            2: 47165,
-            3: 59430,
-            4: 71695,
-            5: 83960,
-            6: 96225,
-            7: 108490,
-            8: 120755,
-            9: 133020,
-        }
-
-        if members_plus_pregnant in income_thresholds:
-            return (
-                request.income_household_total_yearly
-                <= income_thresholds[members_plus_pregnant]
-            )
-
-        return False
+        return income_at_or_below(request, cls.program, request.members_plus_pregnant)

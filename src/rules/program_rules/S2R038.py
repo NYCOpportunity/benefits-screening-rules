@@ -7,6 +7,7 @@ from __future__ import annotations
 from src.rules.base_rule import BaseRule
 from src.rules.registry import register_rule
 from src.models.enums import HouseholdMemberType
+from src.rules.thresholds import pathway_limit
 
 
 @register_rule
@@ -21,51 +22,6 @@ class MedicaidPregnantWomen(BaseRule):
         HouseholdMemberType.GRANDCHILD,
         HouseholdMemberType.SISTER_BROTHER,
         HouseholdMemberType.STEP_SISTER_STEP_BROTHER,
-    }
-
-    PREGNANT_AND_INFANT_THRESHOLDS = {
-        1: 35591,
-        2: 48258,
-        3: 60924,
-        4: 73590,
-        5: 86257,
-        6: 98923,
-        7: 111590,
-        8: 124256,
-        9: 136922,
-    }
-
-    YOUNG_ADULT_THRESHOLDS = {
-        1: 24738,
-        2: 33542,
-        3: 42346,
-        4: 51150,
-        5: 59954,
-        6: 68758,
-        7: 77562,
-        8: 86366,
-    }
-
-    YOUTH_THRESHOLDS = {
-        1: 24579,
-        2: 33326,
-        3: 42073,
-        4: 50820,
-        5: 59568,
-        6: 68315,
-        7: 77062,
-        8: 85809,
-    }
-
-    DEFAULT_THRESHOLDS = {
-        1: 22025,
-        2: 29864,
-        3: 37702,
-        4: 45540,
-        5: 53379,
-        6: 61217,
-        7: 69056,
-        8: 76894,
     }
 
     @classmethod
@@ -84,40 +40,30 @@ class MedicaidPregnantWomen(BaseRule):
 
         if cls._has_pregnant_hoh_or_spouse(persons):
             if cls._meets_income_threshold(
-                members_medicaid,
-                income_medicaid,
-                cls.PREGNANT_AND_INFANT_THRESHOLDS,
+                members_medicaid, income_medicaid, "pregnant_and_infant"
             ):
                 return True
 
         if any(person.age < 1 for person in persons):
             if cls._meets_income_threshold(
-                members_medicaid,
-                income_medicaid,
-                cls.PREGNANT_AND_INFANT_THRESHOLDS,
+                members_medicaid, income_medicaid, "pregnant_and_infant"
             ):
                 return True
 
         if any(cls._is_19_or_20_with_child_relation(person) for person in persons):
             if cls._meets_income_threshold(
-                members_medicaid,
-                income_medicaid,
-                cls.YOUNG_ADULT_THRESHOLDS,
+                members_medicaid, income_medicaid, "young_adult"
             ):
                 return True
 
         if any(cls._is_youth_eligible(person) for person in persons):
             if cls._meets_income_threshold(
-                members_medicaid,
-                income_medicaid,
-                cls.YOUTH_THRESHOLDS,
+                members_medicaid, income_medicaid, "youth"
             ):
                 return True
 
         return cls._meets_income_threshold(
-            members_medicaid,
-            income_medicaid,
-            cls.DEFAULT_THRESHOLDS,
+            members_medicaid, income_medicaid, "default"
         )
 
     @classmethod
@@ -209,10 +155,13 @@ class MedicaidPregnantWomen(BaseRule):
         cls,
         members_medicaid: int,
         income_medicaid: float,
-        thresholds: dict[int, int],
+        pathway: str,
     ) -> bool:
-        if members_medicaid >= 9 and 9 in thresholds:
-            return income_medicaid <= thresholds[9]
-        if members_medicaid in thresholds:
-            return income_medicaid <= thresholds[members_medicaid]
-        return False
+        if members_medicaid >= 9:
+            limit = pathway_limit("S2R038", pathway, 9)
+            if limit is not None:
+                return income_medicaid <= limit
+        limit = pathway_limit("S2R038", pathway, members_medicaid)
+        if limit is None:
+            return False
+        return income_medicaid <= limit

@@ -6,6 +6,7 @@ from __future__ import annotations
 
 from src.rules.base_rule import BaseRule
 from src.rules.registry import register_rule
+from src.rules.thresholds import pathway_limit
 
 
 @register_rule
@@ -32,33 +33,16 @@ class ChildHealthPlus(BaseRule):
 
         has_infant = any(p.age < 1 for p in persons)
         if has_infant:
-            infant_thresholds = {
-                1: 33584,
-                2: 45582,
-                3: 57579,
-                4: 69576,
-                5: 81574,
-                6: 93571,
-                7: 105569,
-                8: 117566,
-            }
-            if household_size in infant_thresholds:
-                return yearly_income > infant_thresholds[household_size]
-            return False
+            threshold = pathway_limit("S2R057", "infant", household_size)
+            if threshold is None:
+                return False
+            return yearly_income > threshold
 
         has_child_1_to_18 = any(1 <= p.age <= 18 for p in persons)
         if has_child_1_to_18:
-            child_thresholds = {
-                1: 23193,
-                2: 31478,
-                3: 39763,
-                4: 48048,
-                5: 56334,
-                6: 64619,
-                7: 72904,
-                8: 81189,
-            }
-            if household_size in child_thresholds:
-                return yearly_income > child_thresholds[household_size]
+            threshold = pathway_limit("S2R057", "child", household_size)
+            if threshold is None:
+                return False
+            return yearly_income > threshold
 
         return False

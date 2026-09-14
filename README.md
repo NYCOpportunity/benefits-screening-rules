@@ -1,11 +1,11 @@
-# Benefits Screening API
+# Benefits Screening Rules
 
-Refactor of the Benefits Screening API and rules code in Python
+Refactor of the Benefits Screening program rules code in Python
 
 ## File Map
 
 ```
-benefits-screening-api/
+benefits-screening-rules/
 ├── src/
 │   ├── models/
 │   │   ├── enums.py                           # Fixed-value enums (income types, etc.)

@@ -6,6 +6,7 @@ from __future__ import annotations
 
 from src.rules.base_rule import BaseRule
 from src.rules.registry import register_rule
+from src.rules.thresholds import pathway_limit
 
 
 @register_rule
@@ -29,45 +30,9 @@ class CashAssistance(BaseRule):
         # Get monthly income after work expense deduction
         monthly_income = request.income_household_monthly_ca_minus_work_expense
 
-        # Get appropriate threshold based on household size and composition
-        if has_child_or_pregnant:
-            threshold = cls._get_child_pregnant_threshold(household_size)
-        else:
-            threshold = cls._get_general_threshold(household_size)
-
+        pathway = "with_child_or_pregnant" if has_child_or_pregnant else "general"
+        threshold = pathway_limit("S2R010", pathway, household_size)
         if threshold is None:
             return False
 
         return monthly_income < threshold
-
-    @classmethod
-    def _get_child_pregnant_threshold(cls, household_size: int) -> float | None:
-        """Get income threshold for households with children or pregnant members"""
-        thresholds = {
-            1: 460.10,
-            2: 574.50,
-            3: 789.00,
-            4: 951.70,
-            5: 1119.70,
-            6: 1238.20,
-            7: 1357.70,
-            8: 1455.20,
-        }
-
-        return thresholds.get(household_size)
-
-    @classmethod
-    def _get_general_threshold(cls, household_size: int) -> float | None:
-        """Get income threshold for general households"""
-        thresholds = {
-            1: 398.10,
-            2: 541.50,
-            3: 675.00,
-            4: 813.70,
-            5: 955.70,
-            6: 1063.20,
-            7: 1214.70,
-            8: 1330.20,
-        }
-
-        return thresholds.get(household_size)
