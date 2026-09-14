@@ -338,6 +338,19 @@ S2R043:
     7: 65678
     8: 73103
 
+S2R055:
+  cash_on_hand_maximum: 256245
+  field: income_household_total_yearly
+  by_size:
+    1: 179355
+    2: 205095
+    3: 230670
+    4: 256245
+    5: 276705
+    6: 297165
+    7: 317790
+    8: 338250
+
 S2R057:
   infant:
     by_size:
@@ -359,19 +372,6 @@ S2R057:
       6: 64619
       7: 72904
       8: 81189
-
-S2R055:
-  cash_on_hand_maximum: 256245
-  field: income_household_total_yearly
-  by_size:
-    1: 179355
-    2: 205095
-    3: 230670
-    4: 256245
-    5: 276705
-    6: 297165
-    7: 317790
-    8: 338250
 
 S2R058:
   field: income_household_total_yearly
