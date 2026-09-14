@@ -36,7 +36,6 @@ class WomenInfantsChildren(BaseRule):
         if not has_eligible_person:
             return False
         
-        # Rule 1: Check Medicaid/Disability Medicaid/Cash Assistance eligibility
         if cls._has_medicaid_or_cash_assistance(persons):
             return True
 
