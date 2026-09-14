@@ -65,7 +65,7 @@ class TestS2R001:
         request = make_aggregate_request(
             persons=persons,
             expense_household_has_child_or_dependent_care=has_care_expense,
-            income_hoh_and_spouse_earned_yearly=5000.0,
+            income_head_and_spouse_earned_yearly=5000.0,
         )
 
         assert RULES["S2R001"].evaluate(request) is expected
@@ -215,7 +215,7 @@ class TestS2R006:
     def test_eligible_unmarried_with_qualifying_child(self):
         request = self._request(
             [self.HOH, self.QUALIFYING_CHILD],
-            income_hoh_earned_yearly=self.SINGLE_WITH_CHILDREN,
+            income_head_earned_yearly=self.SINGLE_WITH_CHILDREN,
         )
 
         assert RULES["S2R006"].evaluate(request) is True
@@ -223,7 +223,7 @@ class TestS2R006:
     def test_eligible_unmarried_without_qualifying_children(self):
         request = self._request(
             [self.HOH],
-            income_hoh_earned_yearly=self.SINGLE_NO_CHILDREN,
+            income_head_earned_yearly=self.SINGLE_NO_CHILDREN,
         )
 
         assert RULES["S2R006"].evaluate(request) is True
@@ -231,7 +231,7 @@ class TestS2R006:
     def test_eligible_unmarried_with_non_qualifying_child(self):
         request = self._request(
             [self.HOH, self.NON_QUALIFYING_CHILD],
-            income_hoh_earned_yearly=self.SINGLE_NO_CHILDREN,
+            income_head_earned_yearly=self.SINGLE_NO_CHILDREN,
         )
 
         assert RULES["S2R006"].evaluate(request) is True
@@ -240,7 +240,7 @@ class TestS2R006:
         request = self._request(
             [self.HOH, self.SPOUSE, self.QUALIFYING_CHILD],
             head_of_household_married=True,
-            income_hoh_and_spouse_earned_yearly=self.MARRIED_WITH_CHILDREN,
+            income_head_and_spouse_earned_yearly=self.MARRIED_WITH_CHILDREN,
         )
 
         assert RULES["S2R006"].evaluate(request) is True
@@ -249,7 +249,7 @@ class TestS2R006:
         request = self._request(
             [self.HOH, self.SPOUSE],
             head_of_household_married=True,
-            income_hoh_and_spouse_earned_yearly=self.MARRIED_NO_CHILDREN,
+            income_head_and_spouse_earned_yearly=self.MARRIED_NO_CHILDREN,
         )
 
         assert RULES["S2R006"].evaluate(request) is True
@@ -265,7 +265,7 @@ class TestS2R006:
     def test_ineligible_without_earned_income(self):
         request = self._request(
             [self.HOH, self.QUALIFYING_CHILD],
-            income_hoh_earned_yearly=0.0,
+            income_head_earned_yearly=0.0,
         )
 
         assert RULES["S2R006"].evaluate(request) is False
@@ -273,7 +273,7 @@ class TestS2R006:
     def test_ineligible_over_earned_limit_with_qualifying_child(self):
         request = self._request(
             [self.HOH, self.QUALIFYING_CHILD],
-            income_hoh_earned_yearly=self.SINGLE_WITH_CHILDREN + 1,
+            income_head_earned_yearly=self.SINGLE_WITH_CHILDREN + 1,
         )
 
         assert RULES["S2R006"].evaluate(request) is False
@@ -281,7 +281,7 @@ class TestS2R006:
     def test_ineligible_over_investment_limit_with_qualifying_child(self):
         request = self._request(
             [self.HOH, self.QUALIFYING_CHILD],
-            income_hoh_earned_yearly=self.SINGLE_WITH_CHILDREN,
+            income_head_earned_yearly=self.SINGLE_WITH_CHILDREN,
             income_person_investment_yearly={0: self.INVESTMENT_LIMIT + 1},
         )
 
@@ -290,7 +290,7 @@ class TestS2R006:
     def test_ineligible_hoh_too_young_without_qualifying_children(self):
         request = self._request(
             [self.YOUNG_HOH],
-            income_hoh_earned_yearly=self.SINGLE_NO_CHILDREN,
+            income_head_earned_yearly=self.SINGLE_NO_CHILDREN,
         )
 
         assert RULES["S2R006"].evaluate(request) is False
