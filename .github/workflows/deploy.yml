@@ -20,7 +20,7 @@ on:
 
 env:
   AWS_REGION: us-east-1
-  LAMBDA_FUNCTION_NAME_PROD: benefits-screening-rules-prod
+  LAMBDA_FUNCTION_NAME_PROD: benefits-screening-rules-prd
   LAMBDA_FUNCTION_NAME_STG: benefits-screening-rules-stg
 
 permissions:
