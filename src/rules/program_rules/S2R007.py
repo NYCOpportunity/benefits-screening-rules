@@ -84,6 +84,8 @@ class SupplementalNutritionAssistanceProgram(BaseRule):
 
     @classmethod
     def _150_fpl_pathway(cls, request):
-        # Earned income present
-        return (request.income_household_wage_self_employment_monthly > 0 or
-                request.income_household_boarder_monthly > 0)
+        return (
+            request.income_household_wage_self_employment_monthly
+            + request.income_household_boarder_monthly
+            > 0
+        )
